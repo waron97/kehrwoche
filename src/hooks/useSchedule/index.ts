@@ -12,7 +12,7 @@ export interface Week {
   color: string;
 }
 
-type Ret = { schedule: Week[] };
+type Ret = { schedule: Week[]; showMore: () => void };
 
 export default function useSchedule(): Ret {
   const [weeksToShow, setWeeksToShow] = useState(20);
@@ -33,5 +33,9 @@ export default function useSchedule(): Ret {
     return ret;
   }, [weeksToShow, thisWeekColor]);
 
-  return { schedule };
+  function showMore() {
+    setWeeksToShow(weeksToShow + 10);
+  }
+
+  return { schedule, showMore };
 }
