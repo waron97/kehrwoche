@@ -1,41 +1,86 @@
 import moment from 'moment';
 import { useMemo, useState } from 'react';
 
-import { colorAfterIters } from './colors';
-import { start } from './start';
+import { colorSequence } from './colors';
+import { Schedule, ScheduleItem, ScheduledTask } from './schedule';
+import { tasks } from './tasks';
 
-const now = moment().startOf('isoWeek');
-const then = moment(start.date).startOf('isoWeek');
-
-export interface Week {
+type Params = {
   date: moment.Moment;
-  color: string;
-}
+};
 
-type Ret = { schedule: Week[]; showMore: () => void };
+export default function useSchedule(params: Params): Schedule {
+  const [firstInstance] = useState(getFirstInstance());
 
-export default function useSchedule(): Ret {
-  const [weeksToShow, setWeeksToShow] = useState(20);
-
-  const thisWeekColor = useMemo(() => {
-    const diff = now.diff(then, 'weeks');
-    return colorAfterIters(diff, start.color);
-    // eslint-disable-next-line
-  }, []);
-
-  const schedule = useMemo(() => {
-    const ret = [];
-    for (let i = 0; i < weeksToShow; i++) {
-      const date = moment(now).add(i, 'weeks');
-      const color = colorAfterIters(i, thisWeekColor);
-      ret.push({ date, color });
+  const schedule: Schedule = useMemo(() => {
+    const diffWeeks = moment(params.date).diff(
+      firstInstance.startDate,
+      'weeks'
+    );
+    const current = getAssignmentsAfter(diffWeeks);
+    const showWeeks = 8;
+    const planner: ScheduleItem[] = [];
+    for (let i = 1; i < showWeeks + 1; i++) {
+      planner.push(getAssignmentsAfter(diffWeeks + i));
     }
-    return ret;
-  }, [weeksToShow, thisWeekColor]);
 
-  function showMore() {
-    setWeeksToShow(weeksToShow + 10);
+    return {
+      current,
+      planner,
+    };
+
+    // eslint-disable-next-line
+  }, [params.date.toISOString()]);
+
+  function getAssignmentsAfter(iters: number): ScheduleItem {
+    const numTasks = tasks.length;
+    const shifts = iters % numTasks;
+    let scheduleItem: ScheduleItem = firstInstance;
+    for (let i = 0; i < shifts; i++) {
+      scheduleItem = getNextAssignments(scheduleItem);
+    }
+    return {
+      assignments: scheduleItem.assignments,
+      startDate: moment(firstInstance.startDate).add(iters, 'weeks'),
+    };
   }
 
-  return { schedule, showMore };
+  function getNextAssignments(item: ScheduleItem): ScheduleItem {
+    const prevOrder = item.assignments.map((a) => a.assignedColor);
+    const newOrder = [
+      prevOrder[prevOrder.length - 1],
+      ...prevOrder.slice(0, prevOrder.length - 1),
+    ];
+    const newAssignments: ScheduledTask[] = [];
+    for (let i = 0; i < newOrder.length; i++) {
+      const task = tasks[i].code;
+      const assignedColor = newOrder[i];
+      newAssignments.push({
+        assignedColor,
+        task,
+      });
+    }
+    return {
+      startDate: moment(item.startDate).add(1, 'week'),
+      assignments: newAssignments,
+    };
+  }
+
+  return schedule;
+}
+
+function getFirstInstance(): ScheduleItem {
+  const assignments: ScheduledTask[] = [];
+  for (let i = 0; i < tasks.length; i++) {
+    const task = tasks[i].code;
+    const assignedColor = colorSequence[i];
+    assignments.push({
+      assignedColor,
+      task,
+    });
+  }
+  return {
+    startDate: moment().startOf('isoWeek'),
+    assignments,
+  };
 }

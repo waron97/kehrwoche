@@ -4,23 +4,20 @@ import styled from 'styled-components';
 
 import { Theme } from '@theme';
 
-import { Schedule as ScheduleType } from '../../hooks/useSchedule/schedule';
-import CurrentWeek from './CurrentWeek';
-import Planner from './Planner';
-
 // ----------------------------------------------------------------------------
 
-interface ScheduleProps {
+interface CardProps {
   className?: string;
-  schedule: ScheduleType;
+  contentClassName?: string;
+  children?: React.ReactNode;
 }
 
-const _Schedule: FC<ScheduleProps> = (props) => {
+const _Card: FC<CardProps> = (props) => {
   // -------------------------------------
   // Props destructuring
   // -------------------------------------
 
-  const { className, schedule } = props;
+  const { className, contentClassName, children } = props;
 
   // -------------------------------------
   // Hooks (e.g. useState, useMemo ...)
@@ -40,20 +37,21 @@ const _Schedule: FC<ScheduleProps> = (props) => {
 
   return (
     <div className={classNames([className])}>
-      <CurrentWeek data={schedule.current} />
-      <Planner data={schedule.planner} />
+      <div className={classNames([contentClassName, 'card-content'])}>
+        {children}
+      </div>
     </div>
   );
 };
 
 // ----------------------------------------------------------------------------
 
-const Schedule = styled(_Schedule)<Theme>`
+const Card = styled(_Card)<Theme>`
   & {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   }
 `;
 
-export default Schedule;
+export default Card;

@@ -4,23 +4,18 @@ import styled from 'styled-components';
 
 import { Theme } from '@theme';
 
-import { Schedule as ScheduleType } from '../../hooks/useSchedule/schedule';
-import CurrentWeek from './CurrentWeek';
-import Planner from './Planner';
-
 // ----------------------------------------------------------------------------
 
-interface ScheduleProps {
+interface DividerProps {
   className?: string;
-  schedule: ScheduleType;
 }
 
-const _Schedule: FC<ScheduleProps> = (props) => {
+const _Divider: FC<DividerProps> = (props) => {
   // -------------------------------------
   // Props destructuring
   // -------------------------------------
 
-  const { className, schedule } = props;
+  const { className } = props;
 
   // -------------------------------------
   // Hooks (e.g. useState, useMemo ...)
@@ -38,22 +33,17 @@ const _Schedule: FC<ScheduleProps> = (props) => {
   // Component local variables
   // -------------------------------------
 
-  return (
-    <div className={classNames([className])}>
-      <CurrentWeek data={schedule.current} />
-      <Planner data={schedule.planner} />
-    </div>
-  );
+  return <div className={classNames([className])} />;
 };
 
 // ----------------------------------------------------------------------------
 
-const Schedule = styled(_Schedule)<Theme>`
+const Divider = styled(_Divider)<Theme>`
   & {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+    width: 100%;
+    margin: 24px 0px;
+    border-bottom: 1px solid #e0e0e0;
   }
 `;
 
-export default Schedule;
+export default Divider;
