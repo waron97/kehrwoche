@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 
 import { colorSequence } from './colors';
 import { Schedule, ScheduleItem, ScheduledTask } from './schedule';
-import { tasks } from './tasks';
+import { TaskCode, tasks } from './tasks';
 
 type Params = {
   date: moment.Moment;
@@ -70,17 +70,15 @@ export default function useSchedule(params: Params): Schedule {
 }
 
 function getFirstInstance(): ScheduleItem {
-  const assignments: ScheduledTask[] = [];
-  for (let i = 0; i < tasks.length; i++) {
-    const task = tasks[i].code;
-    const assignedColor = colorSequence[i];
-    assignments.push({
-      assignedColor,
-      task,
-    });
-  }
+  const assignments: ScheduledTask[] = [
+    { task: TaskCode.Bathrooms, assignedColor: colorSequence.green },
+    { task: TaskCode.Break, assignedColor: colorSequence.blue },
+    { task: TaskCode.Kitchen, assignedColor: colorSequence.red },
+    { task: TaskCode.Break, assignedColor: colorSequence.purple },
+    { task: TaskCode.Floors, assignedColor: colorSequence.yellow },
+  ];
   return {
-    startDate: moment().startOf('isoWeek'),
+    startDate: moment('2023-10-11').startOf('isoWeek'),
     assignments,
   };
 }

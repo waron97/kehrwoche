@@ -8,6 +8,7 @@ import { Theme } from '@theme';
 
 interface DividerProps {
   className?: string;
+  margin?: string;
 }
 
 const _Divider: FC<DividerProps> = (props) => {
@@ -33,7 +34,14 @@ const _Divider: FC<DividerProps> = (props) => {
   // Component local variables
   // -------------------------------------
 
-  return <div className={classNames([className])} />;
+  return (
+    <div
+      className={classNames([className])}
+      style={{
+        margin: `${props.margin || '24px'} 0px`,
+      }}
+    />
+  );
 };
 
 // ----------------------------------------------------------------------------
@@ -41,7 +49,6 @@ const _Divider: FC<DividerProps> = (props) => {
 const Divider = styled(_Divider)<Theme>`
   & {
     width: 100%;
-    margin: 24px 0px;
     border-bottom: 1px solid #e0e0e0;
   }
 `;

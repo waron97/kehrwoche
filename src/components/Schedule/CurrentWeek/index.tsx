@@ -1,12 +1,14 @@
 import classNames from 'classnames';
 import moment from 'moment';
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { Theme } from '@theme';
 
 import { ScheduleItem } from '../../../hooks/useSchedule/schedule';
+import { TaskCode } from '../../../hooks/useSchedule/tasks';
 import Card from '../../Card';
+import Divider from '../../Divider';
 import TaskBox from '../../TaskBox';
 
 // ----------------------------------------------------------------------------
@@ -27,17 +29,82 @@ const _CurrentWeek: FC<CurrentWeekProps> = (props) => {
   // Hooks (e.g. useState, useMemo ...)
   // -------------------------------------
 
+  const [vw, setVW] = useState(window.innerWidth);
+
   // -------------------------------------
   // Effects
   // -------------------------------------
+
+  useEffect(() => {
+    const handleResize = () => setVW(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // -------------------------------------
   // Component functions
   // -------------------------------------
 
+  function renderDesktop() {
+    return (
+      <div className="assignments">
+        {data.assignments.map((a) => (
+          <TaskBox
+            className="box"
+            key={`${a.task}-${a.assignedColor}`}
+            assignment={a}
+            size={'large'}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  function renderMobile() {
+    return (
+      <div className="assignments">
+        <div className="assignments-inactive">
+          {data.assignments
+            .filter((a) => {
+              return a.task === TaskCode.Break;
+            })
+            .map((a) => {
+              return (
+                <TaskBox
+                  className="box"
+                  key={`${a.task}-${a.assignedColor}`}
+                  assignment={a}
+                  size={'small'}
+                />
+              );
+            })}
+        </div>
+        <Divider margin="24px" />
+        <div className="assignments-active">
+          {data.assignments
+            .filter((a) => {
+              return a.task !== TaskCode.Break;
+            })
+            .map((a) => {
+              return (
+                <TaskBox
+                  className="box"
+                  key={`${a.task}-${a.assignedColor}`}
+                  assignment={a}
+                  size={'large'}
+                />
+              );
+            })}
+        </div>
+      </div>
+    );
+  }
+
   // -------------------------------------
   // Component local variables
   // -------------------------------------
+
+  const isMobile = vw <= 576;
 
   return (
     <div className={classNames([className])}>
@@ -46,16 +113,7 @@ const _CurrentWeek: FC<CurrentWeekProps> = (props) => {
           {moment().startOf('isoWeek').format('D MMM YYYY')} -{' '}
           {moment().endOf('isoWeek').format('D MMM YYYY')}
         </h2>
-        <div className="assignments">
-          {data.assignments.map((a) => (
-            <TaskBox
-              className="box"
-              key={`${a.task}-${a.assignedColor}`}
-              assignment={a}
-              size={'large'}
-            />
-          ))}
-        </div>
+        {isMobile ? renderMobile() : renderDesktop()}
       </Card>
     </div>
   );
@@ -81,6 +139,19 @@ const CurrentWeek = styled(_CurrentWeek)<Theme>`
 
       .box {
         flex-shrink: 0;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .assignments {
+        flex-direction: column;
+        gap: 0;
+        .assignments-active,
+        .assignments-inactive {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
       }
     }
   }

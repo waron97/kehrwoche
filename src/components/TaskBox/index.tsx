@@ -13,6 +13,7 @@ interface TaskBoxProps {
   className?: string;
   assignment: ScheduledTask;
   size?: 'large' | 'small';
+  inactive?: boolean;
 }
 
 const _TaskBox: FC<TaskBoxProps> = (props) => {
@@ -42,7 +43,7 @@ const _TaskBox: FC<TaskBoxProps> = (props) => {
 
   return (
     <div
-      className={classNames([className])}
+      className={classNames([className, { inactive: props.inactive }])}
       style={{
         backgroundColor: assignment.assignedColor,
         width: dim(size),
@@ -82,6 +83,10 @@ const TaskBox = styled(_TaskBox)<Theme>`
     .task-name {
       font-size: 15px;
       font-weight: 500;
+    }
+
+    &.inactive {
+      background-color: #e0e0e0 !important;
     }
   }
 `;
